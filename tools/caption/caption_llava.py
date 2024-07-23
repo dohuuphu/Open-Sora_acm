@@ -3,6 +3,7 @@ import csv
 import time
 import warnings
 from datetime import timedelta
+from icecream import ic
 
 import torch
 import torch.distributed as dist
@@ -206,7 +207,9 @@ def main(args):
         output_file_split = output_file.replace(".csv", f"_part{dp_rank}.csv")
         dp_file = open(output_file_split, "w")
         dp_writer = csv.writer(dp_file)
-        dp_writer.writerow(["path", "text", "num_frames"])
+        # dp_writer.writerow(["path", "text", "num_frames"])
+        dp_writer.writerow(['path','id','relpath','num_frames','height','width','aspect_ratio','fps','resolution','aes', 'text'])
+
 
     # ======================================================
     # 5. generate captions
@@ -228,7 +231,8 @@ def main(args):
             torch.cuda.synchronize()
             start_time = time.time()
 
-        video_files, frames, video_lengths, img_size_list, texts = batch
+        video_files, frames, video_lengths, img_size_list, texts, raw_path, raw_id, raw_relpath, raw_num_frames, raw_height, raw_width, raw_aspect_ratio, raw_fps, raw_resolution, raw_aes = batch
+
 
         # encode the batch of inputs
         with Timer() as encode_timer:
@@ -291,8 +295,13 @@ def main(args):
 
         # save results
         if has_dp_writter:
-            result = list(zip(video_files, outputs, video_lengths))
+            # result = list(zip(video_files, outputs, video_lengths))
+            # ic(raw_data)
+            # ic(img_size_list)
+            result = list(zip(raw_path, raw_id, raw_relpath, raw_num_frames, raw_height, raw_width, raw_aspect_ratio, raw_fps, raw_resolution, raw_aes, outputs))
+
             for t in result:
+                # ic(t)
                 dp_writer.writerow(t)
 
     # display profiling info

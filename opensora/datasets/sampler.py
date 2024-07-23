@@ -1,7 +1,7 @@
 from collections import OrderedDict, defaultdict
 from pprint import pformat
 from typing import Iterator, List, Optional
-
+from icecream import ic
 import numpy as np
 import torch
 import torch.distributed as dist
@@ -196,7 +196,7 @@ class VariableVideoBatchSampler(DistributedSampler):
         from pandarallel import pandarallel
 
         pandarallel.initialize(nb_workers=self.num_bucket_build_workers, progress_bar=False)
-        get_logger().info("Building buckets...")
+        get_logger().info("Building buckets........")
         bucket_ids = self.dataset.data.parallel_apply(
             apply,
             axis=1,
@@ -215,6 +215,7 @@ class VariableVideoBatchSampler(DistributedSampler):
             if bucket_id not in bucket_sample_dict:
                 bucket_sample_dict[bucket_id] = []
             bucket_sample_dict[bucket_id].append(i)
+
         return bucket_sample_dict
 
     def get_num_batch(self) -> int:

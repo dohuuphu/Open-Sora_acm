@@ -3,6 +3,7 @@ from contextlib import nullcontext
 from copy import deepcopy
 from datetime import timedelta
 from pprint import pformat
+from icecream import ic
 
 import torch
 import torch.distributed as dist
@@ -211,6 +212,7 @@ def main():
     logger.info("Training for %s epochs with %s steps per epoch", cfg_epochs, num_steps_per_epoch)
 
     # == resume ==
+    ic(cfg.get("load", None))
     if cfg.get("load", None) is not None:
         logger.info("Loading checkpoint")
         ret = load(

@@ -1,5 +1,5 @@
 import time
-
+from icecream import ic
 import pandas as pd
 import torch
 import torchvision.transforms as transforms
@@ -24,6 +24,14 @@ PROMPTS = {
     },
     "video": {
         "text": "Describe this video and its style in a very detailed manner. Pay attention to all objects in the video. The description should be useful for AI to re-generate the video. The description should be no more than six sentences.",
+        "type": "video",
+    },
+    "video-taiwan": {
+        "text": "This video is located at Taiwan. Describe this video and its style in a very detailed manner. Pay attention to all objects in the video. The description should be useful for AI to re-generate the video. The description should be no more than six sentences.",
+        "type": "video",
+    },
+    "video-taiwan_2": {
+        "text": "This video is located at Taiwan. Describe this video and its style in a very detailed manner. Pay attention to all objects in the video. The description should be useful for AI to re-generate the video. The description should be included Taiwan keyword and no more than six sentences.",
         "type": "video",
     },
     "video-text": {
@@ -98,7 +106,8 @@ class VideoTextDataset(torch.utils.data.Dataset):
             images = self.transform(images)
 
         # we put images into a list as pytorch dataloader does not accept Pill
-        out = dict(path=path, image=images, length=length, img_size=imgs_size)
+        
+        out = dict(path=path, image=images, length=length, img_size=imgs_size, raw_path=sample["path"], raw_id=sample["id"], raw_relpath=sample["relpath"], raw_num_frames=sample["num_frames"], raw_height=sample["height"], raw_width=sample["width"], raw_aspect_ratio=sample["aspect_ratio"], raw_fps=sample["fps"], raw_resolution=sample["resolution"], raw_aes=sample["aes"])
         if self.get_text_input_ids is not None:
             if self.use_text:
                 out["text"] = self.get_text_input_ids(sample["text"])
@@ -124,7 +133,17 @@ def collate_fn(batch):
     lengths = [item["length"] for item in batch]
     img_sizes = [item["img_size"] for item in batch]
     texts = [item["text"] for item in batch]
-    return paths, images, lengths, img_sizes, texts
+    raw_path = [item["raw_path"] for item in batch]
+    raw_id = [item["raw_id"] for item in batch]
+    raw_relpath = [item["raw_relpath"] for item in batch]
+    raw_num_frames = [item["raw_num_frames"] for item in batch]
+    raw_height = [item["raw_height"] for item in batch]
+    raw_width = [item["raw_width"] for item in batch]
+    raw_aspect_ratio = [item["raw_aspect_ratio"] for item in batch]
+    raw_fps = [item["raw_fps"] for item in batch]
+    raw_resolution = [item["raw_resolution"] for item in batch]
+    raw_aes = [item["raw_aes"] for item in batch]
+    return paths, images, lengths, img_sizes, texts, raw_path, raw_id, raw_relpath, raw_num_frames, raw_height, raw_width, raw_aspect_ratio, raw_fps, raw_resolution, raw_aes
 
 
 class Timer:
